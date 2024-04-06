@@ -1,0 +1,22 @@
+---
+- name: Test for Grafana and Prometheus access
+  hosts: main # what we run our playbook on
+  # defined by out ansible file
+  gather_facts: no
+  
+  vars:
+    apps:
+      prometheus:
+        port: 9090
+        status_code: [302]
+      grafana:
+        port: 3000
+        status_code: [302]
+  tasks:
+  - name: test_apps
+    ansible.builtin.uri:
+      url: "http://{{ inventory_hostname }}:{{ item.value.port }}" 
+      # inventory_hostname: built in ansible variable
+      follow_redirects: none
+      status_code: "{{ item.value.status_code }}"
+    loop: "{{ lookup('dict', apps) }}"

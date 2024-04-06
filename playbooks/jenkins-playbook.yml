@@ -1,0 +1,36 @@
+---
+# run after changing IP to elastic IP and changing aws_hosts
+# ansible-playbook playbooks/jenkins-playbook.yml
+- name: bootstrap Main Node - Jenkins
+  hosts: localhost
+  become: yes
+
+  tasks:  
+  # Jenkins
+  - name: Download apt key
+    ansible.builtin.apt_key:
+      url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+      state: present
+  - name: Add Jenkins repo to sources.list
+    ansible.builtin.apt_repository:
+      repo: deb https://pkg.jenkins.io/debian-stable binary/
+      filename: jenkins # appends .list
+      state: present
+  - name: Update apt cache and download Java
+    ansible.builtin.apt:
+      update_cache: yes
+      pkg:
+        - fontconfig
+        - openjdk-17-jre
+      state: present
+  - name: Install Jenkins
+    ansible.builtin.apt:
+      name: jenkins
+      state: present
+      force_apt_get: true
+  - name: Ensure Jenkins is started and enabled
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/systemd_service_module.html#ansible-collections-ansible-builtin-systemd-service-module
+    ansible.builtin.systemd_service:
+      name: jenkins
+      state: started
+      enabled: true

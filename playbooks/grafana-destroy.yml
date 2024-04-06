@@ -1,0 +1,22 @@
+---
+- name: Uninstall Grafana
+  hosts: hosts # what we run our playbook on
+  # defined by out ansible file
+  become: yes
+  
+  tasks:
+  - name: Delete apt key
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/apt_key_module.html
+    ansible.builtin.apt_key:
+      # find id by running sudo apt-key list
+      id: B53AE77BADB630A683046005963FA27710458545
+      state: absent
+  - name: Remove Grafana repo from sources.list
+    ansible.builtin.apt_repository:
+      repo: deb https://packages.grafana.com/oss/deb stable main
+      filename: grafana # appends .list
+      state: absent
+  - name: Remove Grafana
+    ansible.builtin.apt:
+      name: grafana
+      state: absent
